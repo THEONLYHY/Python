@@ -1,6 +1,7 @@
 import pygame, sys
 from pygame.locals import *
 from const import *
+from utils import *
 
 #pygame.sprite.Sprite ：Simple base class for visible game objects.
 class Block(pygame.sprite.Sprite):
@@ -26,8 +27,15 @@ class Block(pygame.sprite.Sprite):
         self.width = width
         self.height = height
         self.relPos = relPos
+        
+        self.blink = False
+        self.blinkCount = 0
         self.LoadImage()
         self.UpdateImagePos()
+
+    def StartBlink(self):
+        self.blink = True
+        self.blinkTime = GetCurrentTime()
 
     def LoadImage(self):
         #ps obj无image，从pygame中获得, BlockType是self的
@@ -47,6 +55,8 @@ class Block(pygame.sprite.Sprite):
     def Draw(self, surface):
         #
         self.UpdateImagePos()
+        if self.blink and self.blinkCount % 2 == 0:
+            return 
         surface.blit(self.image, self.rect)
 
     def Drop(self):
@@ -89,3 +99,8 @@ class Block(pygame.sprite.Sprite):
     @property
     def ColIdx(self):
         return self.baseColIdx + self.GetBlockConfigIndex()[1]  
+    
+    def Update(self):
+        if self.blink:
+            diffTime = GetCurrentTime() - self.blinkTime
+            self.blinkCount = int(diffTime / 30)

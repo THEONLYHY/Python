@@ -6,7 +6,7 @@ from game import *
 import random
 
 pygame.init()
-DISPLAYSUF = pygame.display.set_mode((800, 600))
+DISPLAYSUF = pygame.display.set_mode((GAME_WIDTH_SIZE, GAME_HEIGHT_SIZE))
 game = Game(DISPLAYSUF)
 
 while True:

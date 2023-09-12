@@ -60,17 +60,35 @@ class Test:
     #     age = datetime.now().year - self._birthday
     #     return age
     
-    @property
-    def birthday(self):
-        return self._birthdays
+#     @property
+#     def birthday(self):
+#         return self._birthdays
 
-test = Test()
-print(test._birthday)
-test.birthday = 1000
-print(test._birthday)
+# test = Test()
+# print(test._birthday)
+# test.birthday = 1000
+# print(test._birthday)
 
 
 # print(test._name)
 # #有property就可以无需()，当做访问属性一样访问
 # print(test.GetAgeWithProperty)
 # print(test.GetAgeWithoutProperty())
+
+for i in range(5,-1,-2):
+    print ("i = ", i)
+
+DISPLAYSUF = pygame.display.set_mode((800, 600))
+
+Image = pygame.image.load("./Tetris/pic/GameOver.png")
+Rect = Image.get_rect()
+Rect.center = (400, 300)
+
+while True:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+    DISPLAYSUF.blit(Image, Rect)
+    pygame.display.update()

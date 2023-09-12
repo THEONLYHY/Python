@@ -35,10 +35,15 @@ class BlockGroup(object):
                  relPos):
         super().__init__()
         self.blockGroupType = blockGroupType
-        self.time = 0
+        self.time = GetCurrentTime()
         self.pressTime = {}
         self.blocks = []
-        self.dropInterval = 0
+        self.dropInterval = 300
+        self.isEliminating = False
+        self.eliminatingTime = 3
+        
+        self.eliminateRow = 0
+
         for config in blockConfigList:
             blk = Block(config['blockType'], 
                         config['blockShape'],
@@ -63,6 +68,21 @@ class BlockGroup(object):
                 for b in self.blocks:
                     b.Drop()
             self.KeyDownHandler()
+        
+        for blk in self.blocks:
+            blk.Update()
+
+        if self.IsEliminating():
+            if GetCurrentTime() - self.eliminatingTime > 500:
+                tmpBlocks = []
+                for blk in self.blocks:
+                    if blk.GetIndex()[0] != self.eliminateRow:
+                        if blk.GetIndex()[0] < self.eliminateRow:
+                            blk.Drop()
+                        tmpBlocks.append(blk)
+                self.blocks = tmpBlocks
+                self.SetEliminate(False)
+
 
     def Draw(self, surface):
         for b in self.blocks:
@@ -118,8 +138,45 @@ class BlockGroup(object):
         else:
             self.dropInterval = 800
         
-        if pressed[K_UP]:
+        if pressed[K_UP] and self.CheckAndSetPressTime(K_UP):
             for blk in self.blocks:
                 blk.DoRotate()
 
+    def DoEliminate(self, row):
+        self.SetEliminate(True)
+        eliminateRow = {}
+        self.eliminateRow = row
+        for col in range(0, GAME_COL):
+            idx = (row, col)
+            eliminateRow[idx] = 1
+        
+        for blk in self.blocks:
+            if eliminateRow.get( blk.GetIndex()):
+                blk.StartBlink()
 
+
+    def ProcessEliminate(self):
+
+        hash = {}
+        allIndexes = self.GetBlockIndexes()
+        
+        for idx in allIndexes:
+            hash[idx] = 1
+
+        for row in range(GAME_ROW - 1, -1, -1):
+            full = True
+            for col in range(0, GAME_COL):
+                idx = (row, col)
+                if not hash.get(idx):
+                    full = False
+                    break
+            
+            if full:
+                self.DoEliminate(row)
+                return
+    
+    def SetEliminate(self, bEI):
+        self.isEliminating = bEI
+        
+    def IsEliminating(self):
+        return self.isEliminating

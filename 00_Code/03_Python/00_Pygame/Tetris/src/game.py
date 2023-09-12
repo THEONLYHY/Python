@@ -5,14 +5,17 @@ from const import *
 
 
 class Game(pygame.sprite.Sprite):
-    def GetRelPos(self):
-        return (240, 50)
-    
+
     def __init__(self, surface):
         self.surface = surface
         self.fixedBlockGroup = BlockGroup(BlockGroupType.FIXED, BLOCK_SIZE_W, BLOCK_SIZE_H, [], self.GetRelPos())
         self.dropBlockGroup = None
+        self.gameOverImage = pygame.image.load("./Tetris/pic/GameOver.png")
+        self.isGameOver = False
 
+    def GetRelPos(self):
+        return (240, 50)
+    
     def GenerateDropBlockGroup(self):
         #从屏幕上方中间位置开始生成
         conf = BlockGroup.GenerateBlockGroupConfig(0, GAME_COL/2 - 1)
@@ -34,7 +37,15 @@ class Game(pygame.sprite.Sprite):
         return False
     
     def Update(self):
+        if self.isGameOver:
+            return
+        self.CheckGameOver()
+
         self.fixedBlockGroup.Update()
+
+        if self.fixedBlockGroup.IsEliminating():
+            return
+    
         #如果有下落的就直接更新
         if self.dropBlockGroup:
             self.dropBlockGroup.Update()
@@ -48,11 +59,26 @@ class Game(pygame.sprite.Sprite):
                 self.fixedBlockGroup.addBlock(blk)
             self.dropBlockGroup.CleanBlocks()
             self.dropBlockGroup = None
+            self.fixedBlockGroup.ProcessEliminate()
 
     def Draw(self):
         self.fixedBlockGroup.Draw(self.surface)
         if self.dropBlockGroup:
             self.dropBlockGroup.Draw(self.surface)
 
+        if self.isGameOver:
+            rect = self.gameOverImage.get_rect()
+            rect.centerx = GAME_WIDTH_SIZE / 2
+            rect.centery = GAME_HEIGHT_SIZE / 2
+            self.surface.blit(self.gameOverImage, rect)
 
-    
+    def CheckGameOver(self):
+        allIndexes = self.fixedBlockGroup.GetBlockIndexes()
+        for idx in allIndexes:
+            if idx[0] < 2:
+                self.isGameOver = True
+        
+
+        
+
+        
